@@ -20,3 +20,8 @@ yarn-error.log
 /.vscode
 /public/img
 /public/images
+/bootstrap
+/storage
+/test
+/database
+/config
