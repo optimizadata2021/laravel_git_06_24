@@ -1,47 +1,82 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+@extends('layouts.app')
 
-    <form method="POST" action="{{ route('login') }}">
+@section('jspagina')
+    <script type="text/javascript" src="{{ asset('build/assets/login/login.js') }}"></script>
+@endsection
+
+@section('content')
+    @php
+    use Illuminate\Support\Facades\DB;
+
+    // Valores por defecto
+    $imagen_mostrar = asset('images/optimiza.png');
+    $nombre_mostrar = 'OptimizaData';
+
+    if (request()->has('acced') && request()->has('actnf')) {
+        $token_1 = request('acced');
+        $token_2 = request('actnf');
+
+        $result = DB::table('controlcuentas')
+            ->select('imagen_mostrar', 'nombre_mostrar')
+            ->where('token_1', $token_1)
+            ->where('token_2', $token_2)
+            ->first();
+
+        if ($result) {
+            $imagen_mostrar = $result->imagen_mostrar;
+            $nombre_mostrar = $result->nombre_mostrar;
+        }
+    }
+    @endphp
+
+    <form method="POST" name="login" action="{{ route('login') }}">
         @csrf
+        <div class="panel panel-body login-form">
+            <div class="text-center form-group">
+                <img src="{{ $imagen_mostrar }}" width="253" height="70">
+            </div>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+            <div class="form-group" style="margin-top: 40px;">
+                <div class="form-group has-feedback has-feedback-left">
+                    <input id="email" type="email"
+                        class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" placeholder="Usuario"
+                        name="email" value="{{ old('email') }}" required autofocus>
+                    <div class="form-control-feedback">
+                        <i class="icon-user text-muted"></i>
+                    </div>
+                </div>
+                @if ($errors->has('email'))
+                    <span class="invalid-feedback">
+                        <strong>{{ $errors->first('email') }}</strong>
+                    </span>
+                @endif
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+                <div class="form-group has-feedback has-feedback-left mb-20">
+                    <input id="password" type="password"
+                        class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" placeholder="Contraseña"
+                        name="password" required>
+                    <div class="form-control-feedback">
+                        <i class="icon-lock2 text-muted"></i>
+                    </div>
+                </div>
+                @if ($errors->has('password'))
+                    <span class="invalid-feedback">
+                        <strong>{{ $errors->first('password') }}</strong>
+                    </span>
+                @endif
+            </div>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+            <div class="form-group" style="margin-top: 40px;">
+                <button type="submit" class="btn btn-primary btn-block">
+                    {{ __('Acceder') }}<i class="icon-circle-right2 position-right"></i>
+                </button>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+                <div class="text-center pt-15">
+                    <a class="" href="{{ route('password.request') }}">
+                        {{ __('¿No recuerdas tu contraseña?') }}
+                    </a>
+                </div>
+            </div>
         </div>
     </form>
-</x-guest-layout>
+@endsection
